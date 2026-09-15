@@ -1,0 +1,241 @@
+<?xml version="1.0"?>
+
+<robot
+    xmlns:xacro="http://www.ros.org/wiki/xacro"
+    name="david_right_hand">
+
+    <!-- ================================================== -->
+    <!-- MATERIAL -->
+    <!-- ================================================== -->
+
+    <material name="hand_material">
+        <color rgba="0.75 0.75 0.75 1.0"/>
+    </material>
+
+
+    <!-- ================================================== -->
+    <!-- PALM -->
+    <!-- ================================================== -->
+
+    <link name="right_palm_link">
+
+        <visual>
+            <origin xyz="0 0 0"/>
+            <geometry>
+                <box size="0.10 0.025 0.12"/>
+            </geometry>
+            <material name="hand_material"/>
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0"/>
+            <geometry>
+                <box size="0.10 0.025 0.12"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <mass value="0.30"/>
+            <origin xyz="0 0 0"/>
+
+            <inertia
+                ixx="0.0004"
+                ixy="0.0"
+                ixz="0.0"
+                iyy="0.0004"
+                iyz="0.0"
+                izz="0.0002"/>
+        </inertial>
+
+    </link>
+
+
+    <!-- ================================================== -->
+    <!-- FINGER MACRO -->
+    <!-- ================================================== -->
+
+    <xacro:macro
+        name="finger"
+        params="name x length max_angle">
+
+        <link name="right_${name}_link">
+
+            <visual>
+                <origin xyz="0 0 ${length / 2.0}"/>
+
+                <geometry>
+                    <box size="0.015 0.018 ${length}"/>
+                </geometry>
+
+                <material name="hand_material"/>
+            </visual>
+
+            <collision>
+                <origin xyz="0 0 ${length / 2.0}"/>
+
+                <geometry>
+                    <box size="0.015 0.018 ${length}"/>
+                </geometry>
+            </collision>
+
+            <inertial>
+                <mass value="0.03"/>
+                <origin xyz="0 0 ${length / 2.0}"/>
+
+                <inertia
+                    ixx="0.00002"
+                    ixy="0.0"
+                    ixz="0.0"
+                    iyy="0.00002"
+                    iyz="0.0"
+                    izz="0.000005"/>
+            </inertial>
+
+        </link>
+
+
+        <joint
+            name="right_${name}_actuator_joint"
+            type="revolute">
+
+            <parent link="right_palm_link"/>
+            <child link="right_${name}_link"/>
+
+            <origin
+                xyz="${x} 0 0.06"
+                rpy="0 0 0"/>
+
+            <axis xyz="0 1 0"/>
+
+            <limit
+                lower="0.0"
+                upper="${max_angle}"
+                effort="1.0"
+                velocity="3.0"/>
+
+            <dynamics
+                damping="0.2"
+                friction="0.05"/>
+
+        </joint>
+
+    </xacro:macro>
+
+
+    <!-- ================================================== -->
+    <!-- FIVE FINGERS -->
+    <!-- ================================================== -->
+
+    <xacro:finger
+        name="thumb"
+        x="0.045"
+        length="0.055"
+        max_angle="1.0"/>
+
+    <xacro:finger
+        name="index"
+        x="0.025"
+        length="0.085"
+        max_angle="1.2"/>
+
+    <xacro:finger
+        name="middle"
+        x="0.0"
+        length="0.090"
+        max_angle="1.2"/>
+
+    <xacro:finger
+        name="ring"
+        x="-0.025"
+        length="0.080"
+        max_angle="1.2"/>
+
+    <xacro:finger
+        name="little"
+        x="-0.045"
+        length="0.070"
+        max_angle="1.2"/>
+
+
+    <!-- ================================================== -->
+    <!-- ROS 2 CONTROL -->
+    <!-- ================================================== -->
+
+    <ros2_control
+        name="GazeboSimSystem"
+        type="system">
+
+        <hardware>
+            <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </hardware>
+
+        <joint name="right_thumb_actuator_joint">
+            <command_interface name="position"/>
+
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="right_index_actuator_joint">
+            <command_interface name="position"/>
+
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="right_middle_actuator_joint">
+            <command_interface name="position"/>
+
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="right_ring_actuator_joint">
+            <command_interface name="position"/>
+
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="right_little_actuator_joint">
+            <command_interface name="position"/>
+
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+
+            <state_interface name="velocity"/>
+        </joint>
+
+    </ros2_control>
+
+
+    <!-- ================================================== -->
+    <!-- GAZEBO ROS 2 CONTROL -->
+    <!-- ================================================== -->
+
+    <gazebo>
+
+        <plugin
+            filename="gz_ros2_control-system"
+            name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+
+            <parameters>$(find david_hand_description)/config/controllers.yaml</parameters>
+
+        </plugin>
+
+    </gazebo>
+
+</robot>
